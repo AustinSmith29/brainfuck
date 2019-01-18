@@ -1,10 +1,20 @@
 #include <stdio.h>
 
-void read_program(int buf[], int max)
+void dump(int buf[])
+{
+  int i;
+  for (i=0; i < 10; i++)
+    {
+      printf("%d ",buf[i]);
+    }
+  printf("\n");
+}
+
+void read_program(char buf[], int max, FILE *f)
 {
   int c;
   int i = 0;
-  while ((c = getchar()) != '\0' && i < max-1)
+  while ((c = getc(f)) != '\0' && i < max-1)
     {
       buf[i++] = c;
     }
@@ -14,11 +24,12 @@ void read_program(int buf[], int max)
 int main(int argc, char *argv[])
 {
   int mem_tape[4096] = {0};
-  int program[4096];
+  char program[4096];
   int in_ptr = 0;
   int mem_ptr = 0;
   int c;
-  read_program(program, 4096);
+  FILE *f = fopen(argv[1], "r");
+  read_program(program, 4096, f);
 
   while ((c = program[in_ptr]) != '\0')
     {
@@ -40,7 +51,9 @@ int main(int argc, char *argv[])
           putchar(mem_tape[mem_ptr]);
           break;
         case ',':
-          mem_tape[mem_ptr] = program[in_ptr+1];
+          printf("$ ");
+          mem_tape[mem_ptr] = getchar();
+          printf("\n");
           break;
         case '[':
           if (mem_tape[mem_ptr] == 0)
@@ -53,7 +66,6 @@ int main(int argc, char *argv[])
                     depth++;
                   if (program[in_ptr] == ']')
                     depth--;
-                  printf("%d\n", depth);
                 }
             }
           break;
@@ -72,6 +84,7 @@ int main(int argc, char *argv[])
             }
           break;
         }
+      //dump(mem_tape);
       in_ptr++;
     }
   return 0;

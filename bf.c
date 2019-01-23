@@ -1,14 +1,5 @@
 #include <stdio.h>
-
-void dump(int buf[])
-{
-  int i;
-  for (i=0; i < 10; i++)
-    {
-      printf("%d ",buf[i]);
-    }
-  printf("\n");
-}
+#include <errno.h>
 
 void read_program(char buf[], int max, FILE *f)
 {
@@ -23,22 +14,44 @@ void read_program(char buf[], int max, FILE *f)
 
 int main(int argc, char *argv[])
 {
-  int mem_tape[4096] = {0};
+  if (argc > 2)
+    {
+      perror("No program detected. Usage bf [file]\n");
+      return 1;
+    }
+  const int MEM_SIZE = 30000
+  unsigned int mem_tape[MEM_SIZE] = {0};
   char program[4096];
   int in_ptr = 0;
   int mem_ptr = 0;
-  int c;
   FILE *f = fopen(argv[1], "r");
+  if (!f)
+    {
+      perror("File not found.\n");
+      return 1;
+    }
   read_program(program, 4096, f);
+  fclose(f);
 
+  int c;
   while ((c = program[in_ptr]) != '\0')
     {
       switch (c)
         {
         case '>':
+          if (mem_ptr > MEM_SIZE-1)
+            {
+              perror("Error: mem_ptr out of bounds.\n");
+              return 1;
+            }
           mem_ptr++;
           break;
         case '<':
+          if (mem_ptr < 0)
+            {
+              perror("Error: mem_ptr out of bounds.\n");
+              return 1;
+            }
           mem_ptr--;
           break;
         case '+':
@@ -84,7 +97,6 @@ int main(int argc, char *argv[])
             }
           break;
         }
-      //dump(mem_tape);
       in_ptr++;
     }
   return 0;

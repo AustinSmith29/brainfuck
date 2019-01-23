@@ -84,7 +84,10 @@ int main(int argc, char *argv[])
           break;
         case ',':
           printf("$ ");
-          mem_tape[mem_ptr] = getchar();
+          int c = getchar();
+          // We don't want EOF to change value in mem cell.
+          if (c != EOF)
+            mem_tape[mem_ptr] = c;
           printf("\n");
           break;
         case '[':

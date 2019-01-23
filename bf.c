@@ -1,15 +1,33 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
+
+#define MEM_SIZE 30000
 
 void read_program(char buf[], int max, FILE *f)
 {
   int c;
   int i = 0;
+  int nlbracket = 0;
+  int nrbracket = 0;
+
   while ((c = getc(f)) != '\0' && i < max-1)
     {
+      if (c == '[')
+        nlbracket++;
+      if (c == ']')
+        nrbracket++;
       buf[i++] = c;
     }
   buf[i] = '\0';
+
+  // Brackets can't be unbalanced.
+  if (nlbracket != nrbracket)
+    {
+      perror("Error: Unbalanced brackets.\n");
+      fclose(f);
+      exit(1);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -19,11 +37,12 @@ int main(int argc, char *argv[])
       perror("No program detected. Usage bf [file]\n");
       return 1;
     }
-  const int MEM_SIZE = 30000
+
   unsigned int mem_tape[MEM_SIZE] = {0};
   char program[4096];
   int in_ptr = 0;
   int mem_ptr = 0;
+
   FILE *f = fopen(argv[1], "r");
   if (!f)
     {

@@ -1,5 +1,6 @@
 #ifndef __BF_H
 #define __BF_H
+
 #include "stack.h"
 
 #define MEM_SIZE  30000

@@ -1,4 +1,5 @@
 #include "bf.h"
+#include "stack.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -23,22 +24,34 @@ void destroy_env(struct Environment *env)
 int bf_read(char buf[], int max)
 {
   int c, i = 0;
-  int nlbracket = 0;
-  int nrbracket = 0;
+  Stack *brackets = stack_create();
 
   while ((c = getchar()) != EOF && i < max-1)
     {
       if (c == '[')
-        nlbracket++;
+        {
+          stack_push(brackets, c);
+        }
       if (c == ']')
-        nrbracket++;
+        {
+          if (stack_empty(brackets))
+            {
+              stack_destroy(brackets);
+              return -1;
+            }
+          stack_pop(brackets);
+        }
       buf[i++] = c;
     }
   buf[i] = '\0';
 
   // Brackets can't be unbalanced.
-  if (nlbracket != nrbracket)
+  if (!stack_empty(brackets))
+    {
+      stack_destroy(brackets);
       return -1;
+    }
+  stack_destroy(brackets);
   return 0;
 }
 
